@@ -38,7 +38,7 @@ public class FeedCommentControllerImpl implements FeedCommentController {
                 .build();
     }
     @GetMapping
-    public ResultDto<List<FeedCommentGetRes>> feedCommentListGet(long feedId){
+    public ResultDto<List<FeedCommentGetRes>> feedCommentListGet(@RequestParam("feed_id") long feedId){
         List<FeedCommentGetRes> result=service.feedCommentListGet(feedId);
         return ResultDto.<List<FeedCommentGetRes>>builder()
                 .statusCode(HttpStatus.OK)

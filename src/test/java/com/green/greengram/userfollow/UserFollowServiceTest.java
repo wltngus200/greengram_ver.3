@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 @ExtendWith(SpringExtension.class) //Spring 컨테이너를 쓰고 싶음 (mapper에서는 MybatisTest)
@@ -37,6 +38,7 @@ class UserFollowServiceTest {
         given(mapper.insUserFollow(p2)).willReturn(1);
         given(mapper.insUserFollow(p3)).willReturn(2);
         //given(mapper.insUserFollow(any())).willReturn(3);//any외에 정확한 값도 가능
+
 
         //when
         assertEquals(0, service.postUserFollow(p1));

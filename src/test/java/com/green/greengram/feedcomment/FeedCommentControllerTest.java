@@ -45,6 +45,8 @@ class FeedCommentControllerTest { //컨트롤러를 테스트 하려면 객체�
     // 스프링 컨테이너에 빈등록을 한다(빈등록: 스프링 컨테이너에 객체 생성을 위임)
     // 빈등록을 받는 이유: 나중에 DI를 받기 위해 맞나?????
     // 코드가 IoC로 되어있기 때문
+
+    private final String BASE_URL = "/api/feed/comment";
     @Test
     void insFeedComment() throws Exception {
         long resultData=1;
@@ -117,7 +119,7 @@ class FeedCommentControllerTest { //컨트롤러를 테스트 하려면 객체�
         //String json=om.writeValueAsString(req1); 쿼리스트링으로 날리기 때문에 필요없다
 
         //쿼리스트링을 짠다
-        MultiValueMap<String, String> params=new LinkedMultiValueMap();
+        MultiValueMap<String, String> params=new LinkedMultiValueMap<>();
         params.add("feed_comment_id", String.valueOf(req1.getFeedCommentId()));
         params.add("signed_user_id", String.valueOf(req1.getSignedUserId()));
 
@@ -125,16 +127,16 @@ class FeedCommentControllerTest { //컨트롤러를 테스트 하려면 객체�
         given(service.deleteFeedComment(req1)).willReturn(result);
 
         //Dto 꾸미기
-        Map<String, Object> map=new HashMap();
+        Map<String, Object> map=new HashMap<>();
         map.put("statusCode", HttpStatus.OK);
         map.put("resultMsg", "ψ(._. )> 가는 거야?");
         map.put("resultData", result);
         String resultJson=om.writeValueAsString(map);
 
         //통신 시도
-        mvc.perform(delete("/api/feed/comment")
-                .params(params)
-        )//.andExpect(status().isOk())
+        mvc.perform(delete(BASE_URL)
+                .queryParams(params)
+        ).andExpect(status().isOk())
         .andExpect(content().json(resultJson))
         .andDo(print());//콘솔에 통신 내용을 찍기 위함
 
@@ -150,22 +152,24 @@ class FeedCommentControllerTest { //컨트롤러를 테스트 하려면 객체�
         res2.setFeedCommentId(3); res2.setComment("반가워");
         FeedCommentGetRes res3=new FeedCommentGetRes();
         res3.setFeedCommentId(4); res3.setComment("룰룽");
-        List commentList=new ArrayList();
+        List<FeedCommentGetRes> commentList=new ArrayList();
         commentList.add(res1);
         commentList.add(res2);
         commentList.add(res3);
 
-        MultiValueMap<String, String> params=new LinkedMultiValueMap();
+        MultiValueMap<String, String> params=new LinkedMultiValueMap<>();
         params.add("feed_id", String.valueOf(feedId));
 
-        Map<String, Object> expectedRes= new HashMap();
+        given(service.feedCommentListGet(feedId)).willReturn(commentList);
+
+        Map<String, Object> expectedRes= new HashMap<>();
         expectedRes.put("statusCode", HttpStatus.OK);
-        expectedRes.put("resultMsg", String.format("rows: %,d", commentList.size()));
-        expectedRes.put("resultData", expectedRes);
+        expectedRes.put("resultMsg", "ヽ(゜▽゜　)－");
+        expectedRes.put("resultData", commentList);
 
         String expectedResJson=om.writeValueAsString(expectedRes);
 
-        mvc.perform(get("/api/feed/comment")
+        mvc.perform(get(BASE_URL)
                 .queryParams(params)
         ).andExpect(status().isOk())
         .andExpect(content().json(expectedResJson))
@@ -177,27 +181,30 @@ class FeedCommentControllerTest { //컨트롤러를 테스트 하려면 객체�
     void feedCommentListGet2() throws Exception {
         long feedId=1;
         FeedCommentGetRes res1=new FeedCommentGetRes();
-        res1.setFeedCommentId(2); res1.setComment("안녕");
+        res1.setFeedCommentId(4); res1.setComment("안녕");
         FeedCommentGetRes res2=new FeedCommentGetRes();
-        res2.setFeedCommentId(2); res2.setComment("반가워");
+        res2.setFeedCommentId(5); res2.setComment("반가워");
         FeedCommentGetRes res3=new FeedCommentGetRes();
-        res3.setFeedCommentId(2); res3.setComment("룰룽");
-        List commentList=new ArrayList();
+        res3.setFeedCommentId(6); res3.setComment("룰룽");
+        List<FeedCommentGetRes> commentList=new ArrayList();
         commentList.add(res1);
         commentList.add(res2);
         commentList.add(res3);
 
-        MultiValueMap<String, String> params=new LinkedMultiValueMap();
+        MultiValueMap<String, String> params=new LinkedMultiValueMap<>();
         params.add("feed_id", String.valueOf(feedId));
 
-        Map<String, Object> expectedRes= new HashMap();
+        given(service.feedCommentListGet(feedId)).willReturn(commentList);
+
+        Map<String, Object> expectedRes= new HashMap<>();
         expectedRes.put("statusCode", HttpStatus.OK);
-        expectedRes.put("resultMsg", String.format("rows: %,d", commentList.size()));
+        expectedRes.put("resultMsg", "ヽ(゜▽゜　)－");
         expectedRes.put("resultData", commentList);
+
 
         String expectedResJson=om.writeValueAsString(expectedRes);
 
-        mvc.perform(get("/api/feed/comment")
+        mvc.perform(get(BASE_URL)
                         .queryParams(params)
                 ).andExpect(status().isOk())
                 .andExpect(content().json(expectedResJson))
@@ -205,4 +212,43 @@ class FeedCommentControllerTest { //컨트롤러를 테스트 하려면 객체�
 
         verify(service).feedCommentListGet(feedId);
         }
+
+    @Test
+    void getFeedCommentList4() throws Exception {
+        long feedId = 1;
+        MultiValueMap<String, String> params = new LinkedMultiValueMap();
+        params.add("feed_id", String.valueOf(feedId));
+
+        List<FeedCommentGetRes> expectList = new ArrayList();
+        FeedCommentGetRes item1 = new FeedCommentGetRes();
+        item1.setFeedCommentId(1);
+
+        FeedCommentGetRes item2 = new FeedCommentGetRes();
+        item2.setFeedCommentId(2);
+
+        FeedCommentGetRes item3 = new FeedCommentGetRes();
+        item3.setFeedCommentId(3);
+
+        expectList.add(item1);
+        expectList.add(item2);
+        expectList.add(item3);
+
+        given(service.feedCommentListGet(feedId)).willReturn(expectList);
+
+        Map<String, Object> expectedRes = new HashMap();
+        expectedRes.put("statusCode", HttpStatus.OK);
+        expectedRes.put("resultMsg", "ヽ(゜▽゜　)－");
+        expectedRes.put("resultData", expectList);
+
+        String expectedResJson = om.writeValueAsString(expectedRes);
+
+        mvc.perform(get(BASE_URL)
+                        .queryParams(params)
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResJson))
+                .andDo(print());
+
+        verify(service).feedCommentListGet(feedId);
+    }
 }
